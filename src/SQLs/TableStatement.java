@@ -22,7 +22,7 @@ public class TableStatement {
 	JsonFileReader reader;
 	Set<String> attributes;
 	Map<String, Integer> attributeLength;
-
+    Set<String> subattributes;
 	public TableStatement() {
 	}
 	
@@ -33,6 +33,7 @@ public class TableStatement {
 	public void getAttributes() {
 		attributeLength = new HashMap<String,Integer>();
 		attributes = new HashSet<String>();
+		subattributes = new HashSet<String>();
 		JSONObject tempJson;
 		
 		reader.resetReader();
@@ -53,17 +54,35 @@ public class TableStatement {
 		for (String a: ccc) {
 			System.out.println(a);
 		}
+		ccc = subattributes.toArray(new String[1]);
+		Arrays.sort(ccc);
+		for (String a : ccc) {
+			System.out.println("+\"" + a +" CHAR(1)," + "\"");
+		}
 	}
 	
 	public void jsonDataType(JSONObject j, String superName) {
 		String[] fileds = JSONObject.getNames(j);
 		if (fileds == null) return;
-		for (String a:fileds) {
-			String b = a.replace(' ', '_');
+		
+		for (String a : fileds) {
+			String tempStrings[] = superName.split(" ");
+			String b = new String();
+			for (String bb : tempStrings) {
+				if (bb.length() == 0) continue;
+				b = b + bb.substring(0, 1);
+			}
+			superName = b;
+			b = a;
 			Object temp = j.get(a);
 			String datatype = temp.getClass().getSimpleName();
 			if (datatype.equals("JSONObject")) {
-				jsonDataType(j.getJSONObject(a), superName + b + "_");
+				if (a.equals("attributes")) {
+					attriutesString(j.getJSONObject(a), "");
+				}
+				else {
+					jsonDataType(j.getJSONObject(a), superName + b + "_");
+				}
 			}
 			else {
 				//attributes.add(a);
@@ -83,6 +102,35 @@ public class TableStatement {
 				}
 			}
 		}
+	}
+	
+	public void attriutesString(JSONObject j, String superName) {
+		String[] fields = JSONObject.getNames(j);
+		if (fields == null) return;
+		
+		for (String a : fields) {
+			String tempStrings[] = a.split(" ");
+			String b = new String();
+			for (String bb : tempStrings) {
+				if (bb.length() == 0) continue;
+				b = b + bb.substring(0, 1);
+			}
+			Object o = j.get(a);
+			String dataType = o.getClass().getSimpleName();
+			if (dataType.equals("JSONObject")) {
+				
+				attriutesString(j.getJSONObject(a), superName + b + '_');
+			}
+			else {
+				if (dataType.equals("Boolean")) {
+					subattributes.add(superName + a.replace(" ", "_"));
+				}
+				else if (dataType.equals("String")) {
+					subattributes.add(superName + a.replace(" ", "_") + "_" + j.getString(a));
+				}
+			}
+		}
+		
 	}
 	
 	public void closeFile() {
