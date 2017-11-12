@@ -1,8 +1,6 @@
-drop table Yelp_User_Friend;
-drop table Yelp_User;
-drop table Yelp_Checkin;
+drop table YelpSubCategory
 drop table YelpBusinessAttributes;
-drop table YelpBusinessCategory;
+drop table YelpMainCategory;
 drop table YelpBusinessNeighbors;
 drop table YelpBusiness;
 drop table Yelp_Review;

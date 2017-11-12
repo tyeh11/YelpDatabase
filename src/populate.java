@@ -187,7 +187,6 @@ public class populate {
 		}
 	}
 	
-	
 	public void insertCheckin(String fileName) {
 		String statements = "";
 		try {
