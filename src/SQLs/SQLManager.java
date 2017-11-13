@@ -1,8 +1,10 @@
 package SQLs;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
 
@@ -10,11 +12,12 @@ public class SQLManager extends Observable {
 	private Connector connector;
 	private Connection connection;
 	private Statement statement;
+	private ResultSet resultSet;
 	private List<String> mainCategory;
 	private List<String> subCategory;
 	private List<String> attributes;
 	
-	SQLManager() throws ClassNotFoundException {
+	public SQLManager() throws ClassNotFoundException {
 		connector = new Connector();
 	}
 	
@@ -23,21 +26,25 @@ public class SQLManager extends Observable {
 		statement = connection.createStatement();
 	}
 	
-	public String generateSQL(String[] select, String[] from, String[] whereAnd, String[] whereOr) {
+	public void disconnect() throws SQLException {
+		connection.close();
+	}
+	@SuppressWarnings("null")
+	public String generateQuery(String[] select, String[] from, String[] whereAnd, String[] whereOr, String orderBy) {
 		// aaa bb
 		StringBuffer sql = new StringBuffer();
 		
-		StringBuffer sSection = new StringBuffer("select ");
+		StringBuffer sSection = new StringBuffer("select distinct ");
 		for (String s: select) {
 			sSection.append(s + ",");
 		}
-		sql.append(sSection.subSequence(0, sSection.length()-1));
+		sql.append(sSection.subSequence(0, sSection.length()-1) + "\n");
 		
 		StringBuffer fSection = new StringBuffer("from ");
 		for (String f: from) {
 			fSection.append(f + ",");
 		}
-		sql.append(fSection.subSequence(0, fSection.length()-1));
+		sql.append(fSection.subSequence(0, fSection.length()-1) + "\n");
 		
 		StringBuffer wSection = new StringBuffer("where ");
 		if (whereAnd != null) {
@@ -54,9 +61,27 @@ public class SQLManager extends Observable {
 		}
 		
 		if (whereAnd != null || whereOr != null) {
-			sql.append(wSection.subSequence(0, wSection.length()-4));
+			sql.append(wSection.subSequence(0, wSection.length()-4) + "\n");
+		}
+		
+		if (orderBy != null && !orderBy.equals("")) {
+			sql.append("order by " + orderBy);
 		}
 		
 		return sql.toString();
+	}
+	
+	public List<String> getCategories(String sql) throws SQLException {
+		connect();
+		List<String> result = new LinkedList<String>();
+		System.out.println(sql);
+		resultSet = statement.executeQuery(sql);
+		
+		while (resultSet.next()) {
+			result.add(resultSet.getString(1));
+		}
+		disconnect();
+		
+		return result;
 	}
 }
