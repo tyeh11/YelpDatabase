@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.sql.SQLException;
 import java.util.List;
@@ -14,26 +15,41 @@ public class HW3 {
 	JPanel mainPanel;
 	JFrame mainFrame;
 	MainCategoryPanel mainCategoryPanel;
-	SubCategoryPanel subCategorypanel;
+	MainCategoryPanel subCategorypanel;
 	ResultPanel resultPanel;
-	AttributePanel attributePanel;
+	MainCategoryPanel attributePanel;
 	SQLManager sqlManager;
 	
 	HW3() {
 		try {
 			sqlManager = new SQLManager();
-			String query = sqlManager.generateQuery(new String[]{"category"}, new String[]{"YelpMainCategory"}, null, null, "category");
-			System.out.println(query);
+			String query = sqlManager.generateQuery("category","YelpMainCategory", null, null, null, "category");
+			//System.out.println(query);
 			List<String> mainCategories = sqlManager.getCategories(query);
-			
-			
+				
 			mainFrame = new JFrame("Yelp Datebase Application");
 			mainPanel = new JPanel();
 			mainFrame.add(mainPanel);			
 			mainPanel.setLayout(new BorderLayout());
 			
-			mainCategoryPanel = new MainCategoryPanel(mainCategories);
-			mainPanel.add(mainCategoryPanel, BorderLayout.EAST);
+			mainCategoryPanel = new MainCategoryPanel(mainCategories, sqlManager, "category", "YelpMainCategory", "category","category");
+			mainPanel.add(mainCategoryPanel.getPanel(), BorderLayout.WEST);
+			mainCategoryPanel.getPanel().setBackground(Color.BLACK);
+			
+			
+			subCategorypanel = new MainCategoryPanel(null, sqlManager, "category", "YelpSubCategory", "category","category");
+			attributePanel = new MainCategoryPanel(null, sqlManager, "attributes", "YelpBusinessAttributes", "attributes", "attributes");
+			
+			mainCategoryPanel.addObserver(subCategorypanel);
+			subCategorypanel.addObserver(attributePanel);
+			subCategorypanel.getPanel().setBackground(Color.BLACK);
+			mainPanel.add(subCategorypanel.getPanel(), BorderLayout.CENTER);
+			mainPanel.add(attributePanel.getPanel(), BorderLayout.EAST);
+			
+			resultPanel = new ResultPanel();
+			//mainPanel.add(resultPanel, BorderLayout.CENTER);
+			
+			
 			mainFrame.setSize(500,500);
 			mainFrame.setVisible(true);
 		} catch (ClassNotFoundException e) {
