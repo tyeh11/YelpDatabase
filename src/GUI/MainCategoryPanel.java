@@ -17,6 +17,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneLayout;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 
 import SQLs.SQLManager;
 
@@ -37,10 +39,10 @@ public class MainCategoryPanel extends Observable implements Observer{
 	private String where;
 	private String orderBy;
 	private boolean condition;
-	
+	private TitledBorder exampleTitle;
 	private JPanel checkBoxPanel;
 	
-	public MainCategoryPanel(List<String> values, SQLManager sqlManager, String select, String from, String where, String orderBy) {
+	public MainCategoryPanel(String name, List<String> values, SQLManager sqlManager, String select, String from, String where, String orderBy) {
 		this.panel = new JPanel();
 		this.checkBoxPanel = new JPanel();
 		this.andCondition = new JRadioButton("AND");
@@ -64,8 +66,9 @@ public class MainCategoryPanel extends Observable implements Observer{
 		tempP.add(andCondition);
 		tempP.add(orCondition);
 		panel.add(tempP, BorderLayout.SOUTH);
+		exampleTitle = new TitledBorder(LineBorder.createGrayLineBorder(), name);
+		//panel.setBorder(exampleTitle);
 		conditionListener = new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JRadioButton r = (JRadioButton)e.getSource();
@@ -77,15 +80,15 @@ public class MainCategoryPanel extends Observable implements Observer{
 				}
 				if (selectedValues.size() == 0) {
 					setChanged();
-					notifyObservers("");
+					notifyObservers(subQuery);
 					return;
 				}
 				String temp;
 				if (condition) { //and
-					temp = sqlManager.generateAndQuery("business_id", from, "business_id",selectedValues.toArray(new String[selectedValues.size()]), null);
+					temp = sqlManager.generateAndQuery("business_id", from,selectedValues.toArray(new String[selectedValues.size()]), "business_id", subQuery, null);
 				}
 				else { // or
-					temp = sqlManager.generateOrQuery("business_id", from, selectedValues.toArray(new String[selectedValues.size()]), "", "");
+					temp = sqlManager.generateOrQuery("business_id", from, selectedValues.toArray(new String[selectedValues.size()]), "business_id", subQuery, null);
 				}
 				setChanged();
 				notifyObservers(temp);
@@ -107,15 +110,15 @@ public class MainCategoryPanel extends Observable implements Observer{
 				}
 				if (selectedValues.size() == 0) {
 					setChanged();
-					notifyObservers("");
+					notifyObservers(subQuery);
 					return;
 				}
 				String temp;
 				if (condition) { //and
-					temp = sqlManager.generateAndQuery("business_id", from, "business_id",selectedValues.toArray(new String[selectedValues.size()]), null);
+					temp = sqlManager.generateAndQuery("business_id", from,selectedValues.toArray(new String[selectedValues.size()]), "business_id", subQuery, null);
 				}
 				else { // or
-					temp = sqlManager.generateOrQuery("business_id", from, selectedValues.toArray(new String[selectedValues.size()]), "", "");
+					temp = sqlManager.generateOrQuery("business_id", from, selectedValues.toArray(new String[selectedValues.size()]), "business_id", subQuery, null);
 				}
 				setChanged();
 				notifyObservers(temp);
@@ -123,7 +126,7 @@ public class MainCategoryPanel extends Observable implements Observer{
 			
 		};
 		JScrollPane tempS = new JScrollPane(checkBoxPanel);
-		
+		tempS.setBorder(exampleTitle);
 		if (values != null) {
 			checkBoxPanel.setLayout(new GridLayout(values.size(), 1));
 			categories = new JCheckBox[values.size()];
@@ -151,11 +154,11 @@ public class MainCategoryPanel extends Observable implements Observer{
 			notifyObservers(""); //notify next panel to clean its panel
 			return;
 		}
-		String temp = sqlManager.generateQuery(select, from, null, "business_id", subQuery, select); //sql for query
+		String temp = sqlManager.generateQuery(select, from, null, "business_id", subQuery, select, true); //sql for query
 
 		try {
-			System.out.println("=====================");
-			System.out.println(temp);
+//			System.out.println("=====================");
+//			System.out.println(temp);
 			List<String> newValues = sqlManager.getCategories(temp);
 
 			categories = new JCheckBox[newValues.size()];
@@ -171,7 +174,7 @@ public class MainCategoryPanel extends Observable implements Observer{
 			panel.revalidate();
 			panel.repaint();
 			setChanged();
-			notifyObservers(""); //notify next panel to clean its panel
+			notifyObservers(arg); //notify next panel to clean its panel
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

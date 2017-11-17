@@ -2,9 +2,6 @@ Create Table YelpBusiness (
 	business_id VARCHAR2(22),
 	city VARCHAR2(50),
 	full_address VARCHAR2(256),
-	hours VARCHAR2(256),
-	latitude BINARY_DOUBLE,
-	longitude BINARY_DOUBLE,
 	name VARCHAR2(256),
 	open CHAR(1),
 	review_count Integer,
@@ -12,6 +9,15 @@ Create Table YelpBusiness (
 	state VARCHAR2(5),
 	checkin_count Integer,
 	primary key (business_id)
+);
+
+create table Hours (
+	business_id VARCHAR2(22),
+	dayOfWeek VARCHAR2(10),
+	openHour CHAR(5),
+	closeHour CHAR(5),
+	primary key (business_id, dayOfWeek),
+	foreign key (business_id) references YelpBusiness(business_id) on delete set null
 );
 
 create table YelpBusinessAttributes(
@@ -34,13 +40,6 @@ create table YelpMainCategory (
 	primary key (business_id, category),
 	foreign key (business_id) references YelpBusiness(business_id) on delete set null
  );
- 
-create table YelpBusinessNeighbors (
-	business_id VARCHAR2(22),
-	name VARCHAR2(256),
-	primary key (business_id, name),
-	foreign key (business_id) references YelpBusiness(business_id) on delete set null
-);
 
 create table Yelp_Review(
 	business_id VARCHAR2(22),
@@ -52,5 +51,6 @@ create table Yelp_Review(
 	votes_cool Integer,
 	votes_funny Integer,
 	votes_useful Integer,
+	user_name VARCHAR2(256),
 	primary key (review_id)
 );

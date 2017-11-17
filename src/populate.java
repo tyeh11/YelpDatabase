@@ -42,10 +42,10 @@ public class populate {
 			}
 			
 			//insert values
-			//p.insertBusiness("./YelpDataset/yelp_business.json", "./YelpDataset/yelp_checkin.json");
+			p.insertBusiness("./YelpDataset/yelp_business.json", "./YelpDataset/yelp_checkin.json");
 			System.out.println("insertBusiness done");
 			//p.insertCheckin("./YelpDataset/yelp_checkin.json");
-			//p.insertReview("./YelpDataset/yelp_review.json");
+			p.insertReview("./YelpDataset/yelp_review.json", "./YelpDataset/yelp_user.json");
 			connection.close();
 			System.out.println("done");
 			
@@ -90,48 +90,48 @@ public class populate {
 		//String statement = "";
 		try {
 			Connection connection = connector.connect();
-			PreparedStatement businessS = connection.prepareStatement("insert into YelpBusiness values (?,?,?,?,?,?,?,?,?,?,?,?)");
+			PreparedStatement businessS = connection.prepareStatement("insert into YelpBusiness values (?,?,?,?,?,?,?,?,?)");
+			PreparedStatement hourS = connection.prepareStatement("insert into Hours values (?,?,?,?)");
 			PreparedStatement attributeS = connection.prepareStatement("insert into YelpBusinessAttributes values(?, ?)");
 			PreparedStatement mainCategoryS = connection.prepareStatement("insert into YelpMainCategory values(?, ?)");
 			PreparedStatement subCategoryS = connection.prepareStatement("insert into YelpSubCategory values(?, ?)");
-			PreparedStatement neighborS = connection.prepareStatement("insert into YelpBusinessNeighbors values(?, ?)");
+//			PreparedStatement neighborS = connection.prepareStatement("insert into YelpBusinessNeighbors values(?, ?)");
 			JsonFileReader reader = new JsonFileReader();
 			reader.loadNewFile(fileName);
 			JSONObject j;
 			
 			while ((j = reader.nextJSONObject()) != null) {
 			
-				//---------------YelpBuisiness---------------------------------------------
-				//turn hours into a string.  format: Mon:12:00-13:00,Tue: 01:00-15:00
-				JSONObject hours = j.getJSONObject("hours");
-				String days[] = JSONObject.getNames(hours);
-				StringBuilder tempBuilder; 
-				String hourString ="";
-				if (days != null) {
-					tempBuilder = new StringBuilder();
-					for (String day : days) { // format: Mon:12:00-13:00,Tue: 01:00-15:00
-						tempBuilder.append(day.substring(0, 3) + ": "); 
-						tempBuilder.append(hours.getJSONObject(day).getString("open") + ":");
-						tempBuilder.append(hours.getJSONObject(day).getString("close") + ",");
-					}
-					hourString = tempBuilder.toString();
-				}
-				
+				//---------------YelpBuisiness---------------------------------------------				
 				businessS.setString(1, j.getString("business_id"));
 				businessS.setString(2, j.getString("city"));
 				businessS.setString(3, j.getString("full_address"));
-				businessS.setString(4, hourString);
-				businessS.setDouble(5, j.getDouble("latitude"));
-				businessS.setDouble(6, j.getDouble("longitude"));
-				businessS.setString(7, j.getString("name"));
-				businessS.setString(8, String.valueOf(j.getBoolean("open")).substring(0, 1));
-				businessS.setInt(9, j.getInt("review_count"));
-				businessS.setDouble(10, j.getDouble("stars"));
-				businessS.setString(11, j.getString("state"));
+				businessS.setString(4, j.getString("name"));
+				businessS.setString(5, String.valueOf(j.getBoolean("open")).substring(0, 1));
+				businessS.setInt(6, j.getInt("review_count"));
+				businessS.setDouble(7, j.getDouble("stars"));
+				businessS.setString(8, j.getString("state"));
 				Integer count = checkinCount.get(j.getString("business_id"));
-				businessS.setInt(12, (count == null) ? 0 : count);
+				businessS.setInt(9, (count == null) ? 0 : count);
 				
 				businessS.executeUpdate();
+				//-------------------hour----------------------------------------
+				JSONObject hours = j.getJSONObject("hours");
+				String days[] = JSONObject.getNames(hours);
+
+				if (days != null) {
+					hourS.setString(1, j.getString("business_id"));
+					for (String day : days) { // format: Mon:12:00-13:00,Tue: 01:00-15:00
+//						tempBuilder.append(day.substring(0, 3) + ": "); 
+//						tempBuilder.append(hours.getJSONObject(day).getString("open") + ":");
+//						tempBuilder.append(hours.getJSONObject(day).getString("close") + ",");
+						hourS.setString(2, day);
+						hourS.setString(3, hours.getJSONObject(day).getString("open"));
+						hourS.setString(4, hours.getJSONObject(day).getString("close"));
+						hourS.executeQuery();
+					}
+					//hourString = tempBuilder.toString();
+				}
 				//---------------YelpBusinessAttributes-------------------------------------
 				
 				JSONObject attribute = j.getJSONObject("attributes");
@@ -164,13 +164,13 @@ public class populate {
 				}
 				
 				//--------------YelpBusinessNeighbors-----------------------------------------
-				List<String> neighbors = jsonArrayToStringList(j.getJSONArray("neighborhoods"));
-				neighborS.setString(1,j.getString("business_id"));
-				for (String neighbor: neighbors) {
-					//statement = "inset into YelpBusinessNeighbors values ('" + j.getString("business_id") + "','" + neighbor + "')";
-					neighborS.setString(2, neighbor);
-					neighborS.executeUpdate();
-				}
+//				List<String> neighbors = jsonArrayToStringList(j.getJSONArray("neighborhoods"));
+//				neighborS.setString(1,j.getString("business_id"));
+//				for (String neighbor: neighbors) {
+//					//statement = "inset into YelpBusinessNeighbors values ('" + j.getString("business_id") + "','" + neighbor + "')";
+//					neighborS.setString(2, neighbor);
+//					neighborS.executeUpdate();
+//				}
 				//return statements;
 			} 
 			connection.close();
@@ -220,12 +220,12 @@ public class populate {
 		}
 	}
 	
-	public void insertReview(String fileName) {
+	public void insertReview(String reviewFileName, String userFileName) {
 		try {
 			Connection connection = connector.connect();
-			PreparedStatement reviewS = connection.prepareStatement("insert into Yelp_Review values (?,?,?,?,?,?,?,?,?)");
-			JsonFileReader reader = new JsonFileReader();
-			reader.loadNewFile(fileName);
+			PreparedStatement reviewS = connection.prepareStatement("insert into Yelp_Review values (?,?,?,?,?,?,?,?,?,?)");
+			reader.loadNewFile(reviewFileName);
+			HashMap<String, String> userMap = geteUserName(userFileName);
 			JSONObject j;
 			while ((j = reader.nextJSONObject()) != null) {
 				reviewS.setString(1, j.getString("business_id"));
@@ -237,6 +237,7 @@ public class populate {
 				reviewS.setInt(7, j.getJSONObject("votes").getInt("cool"));
 				reviewS.setInt(8, j.getJSONObject("votes").getInt("funny"));
 				reviewS.setInt(9, j.getJSONObject("votes").getInt("useful"));
+				reviewS.setString(10, userMap.get(j.getString("user_id")));
 				reviewS.executeUpdate();
 			}
 			connection.close();
@@ -274,6 +275,23 @@ public class populate {
 		}
 		return checkinCount;
 	}
+	
+	public HashMap<String, String> geteUserName(String fileName) {
+		HashMap<String, String> userMap = new HashMap<String, String>(32768);
+		
+		JsonFileReader reader = new JsonFileReader();
+		JSONObject j;
+		try {
+			reader.loadNewFile(fileName);
+			while((j = reader.nextJSONObject()) != null) {
+				userMap.put(j.getString("user_id"), j.getString("name"));
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return userMap;
+	}
 	/**
 	 * This method turns attributes,a JSONObject, to a list of string/ 
 	 * @param j
@@ -293,9 +311,7 @@ public class populate {
 					values.addAll(attributeToString((JSONObject)value, superName + key + "_"));
 					}
 				else if (dataType.equals("Boolean")){
-					if ((Boolean)value) {
-						values.add(superName + key);
-					}
+					values.add(superName + key + "_" + value.toString());
 				} 
 				else {
 					values.add(superName + key + "_" + j.get(key));
@@ -317,6 +333,7 @@ public class populate {
 	
 	public String[] cleanTableData() {
 		String[] statements = {
+				"delete from Hours",
 				"delete from YelpBusinessNeighbors",
 				"delete from YelpMainCategory",
 				"delete from YelpSubCategory",
