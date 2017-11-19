@@ -38,14 +38,16 @@ public class populate {
 			//cleaning table
 			for (String sql : p.cleanTableData()) {
 				tset = sql;
-				//statement.executeUpdate(sql);
+				statement.executeUpdate(sql);
 			}
 			
 			//insert values
-			p.insertBusiness("./YelpDataset/yelp_business.json", "./YelpDataset/yelp_checkin.json");
+			//p.insertBusiness("./YelpDataset/yelp_business.json", "./YelpDataset/yelp_checkin.json");
+			p.insertBusiness(args[0], args[2]);
 			System.out.println("insertBusiness done");
 			//p.insertCheckin("./YelpDataset/yelp_checkin.json");
-			p.insertReview("./YelpDataset/yelp_review.json", "./YelpDataset/yelp_user.json");
+			//p.insertReview("./YelpDataset/yelp_review.json", "./YelpDataset/yelp_user.json");
+			p.insertReview(args[1], args[3]);
 			connection.close();
 			System.out.println("done");
 			
@@ -334,7 +336,6 @@ public class populate {
 	public String[] cleanTableData() {
 		String[] statements = {
 				"delete from Hours",
-				"delete from YelpBusinessNeighbors",
 				"delete from YelpMainCategory",
 				"delete from YelpSubCategory",
 				"delete from YelpBusinessAttributes",

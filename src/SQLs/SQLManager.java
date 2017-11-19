@@ -144,7 +144,10 @@ public class SQLManager extends Observable {
 		while (resultSet.next()) {
 			LinkedList<String> temp = new LinkedList<String>();
 			for (int i = 0; i < 7; i++) {
-				if (i == 2) {
+				if (i == 0) {
+					temp.add(resultSet.getString(i+1).substring(0,10));
+				}
+				else if (i == 2) {
 					Clob c = resultSet.getClob(i+1);
 					temp.add(c.getSubString(1, (int)c.length()));
 				}

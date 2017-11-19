@@ -12,6 +12,7 @@ import java.util.Observer;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollBar;
@@ -179,6 +180,15 @@ public class MainCategoryPanel extends Observable implements Observer{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public void unCheckALL() {
+		for (JCheckBox b: categories) {
+			b.setSelected(false);
+		}
+		selectedValues.clear();
+		setChanged();
+		notifyObservers("");
 	}
 	
 	public JPanel getPanel() {

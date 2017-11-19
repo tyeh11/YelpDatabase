@@ -38,8 +38,9 @@ public class ResultPanel extends JPanel implements Observer{
 		emptyModel = new DefaultTableModel(0, tableIdentifier.length);
 		emptyModel.setColumnIdentifiers(tableIdentifier);
 		emptyTable = new JTable(emptyModel);
-		exampleTitle = new TitledBorder(LineBorder.createGrayLineBorder(), "Business");
 		reviewWindow = new ReviewWindow(sqlManager);
+		exampleTitle = new TitledBorder(LineBorder.createGrayLineBorder(), "Search Result");
+		this.setBorder(exampleTitle);
 		// = new HashMap<String, String>();
 		showEmptyTable();
 	}
@@ -54,11 +55,11 @@ public class ResultPanel extends JPanel implements Observer{
 		if (!openHour.equals("ALL")) {
 			hourQuery =  hourQuery + "openHour <= '" + openHour + "' and ";
 		}
-		System.out.println("****: "  + hourQuery);
+
 		if (!closeHour.equals("ALL")) {
 			hourQuery =  hourQuery + "closeHour > '" + closeHour + "' and ";
 		}
-		System.out.println("*!!!!!**: "  + hourQuery);
+
 		if (!hourQuery.equals("")) {
 			hourQuery = sqlManager.generateQuery("business_id", "Hours", hourQuery.substring(0, hourQuery.length() -  5), "business_id", subQuery, "", true);
 		}
@@ -73,8 +74,8 @@ public class ResultPanel extends JPanel implements Observer{
 		}
 		
 		String query = sqlManager.generateQuery("name, business_id, full_address, city, state, stars, review_count, checkin_count", "YelpBusiness", locationCondition, "business_id", hourQuery, "name", true);
-		System.out.println("****************************************************");
-		System.out.println(query);
+//		System.out.println("****************************************************");
+//		System.out.println(query);
 		List<List<String>> data = sqlManager.getBusiness(query);
 		model = new DefaultTableModel() {
 			/**
@@ -97,7 +98,6 @@ public class ResultPanel extends JPanel implements Observer{
 			public void mouseClicked(MouseEvent evt) {
 				JTable table =(JTable) evt.getSource();
 		        int row = table.rowAtPoint(evt.getPoint());
-		        reviewWindow.setVisible();
 		        try {
 					reviewWindow.updateTable((String)table.getValueAt(row, 1));
 				} catch (SQLException e) {

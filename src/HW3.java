@@ -6,11 +6,14 @@ import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 
 import GUI.*;
 import SQLs.SQLManager;
@@ -29,6 +32,7 @@ public class HW3 {
 	MainCategoryPanel attributePanel;
 	SQLManager sqlManager;
 	JButton search;
+	JButton clear;
 	
 	HW3() {
 		try {
@@ -42,7 +46,6 @@ public class HW3 {
 			mainPanel = new JPanel();
 			mainFrame.add(mainPanel);			
 			mainPanel.setLayout(new BorderLayout());
-			
 			mainCategoryPanel = new MainCategoryPanel("MainCategory", mainCategories, sqlManager, "category", "YelpMainCategory", "category","category");
 			subCategorypanel = new MainCategoryPanel("SubCategory", null, sqlManager, "category", "YelpSubCategory", "category","category");
 			attributePanel = new MainCategoryPanel("Attributes", null, sqlManager, "attributes", "YelpBusinessAttributes", "attributes", "attributes");
@@ -51,21 +54,23 @@ public class HW3 {
 			subCategorypanel.addObserver(attributePanel);
 			//subCategorypanel.getPanel().setBackground(Color.BLACK);
 			JPanel categoryPanel = new JPanel();
-			categoryPanel.setLayout(new BorderLayout());
-			categoryPanel.add(mainCategoryPanel.getPanel(), BorderLayout.WEST);
-			categoryPanel.add(subCategorypanel.getPanel(), BorderLayout.CENTER);
-			categoryPanel.add(attributePanel.getPanel(), BorderLayout.EAST);
-			mainPanel.add(categoryPanel, BorderLayout.CENTER);
+
+			categoryPanel.setLayout(new GridLayout(1,3));
+			categoryPanel.add(mainCategoryPanel.getPanel());
+			categoryPanel.add(subCategorypanel.getPanel());
+			categoryPanel.add(attributePanel.getPanel());
+			mainPanel.add(categoryPanel, BorderLayout.WEST);
 	
 			resultPanel = new ResultPanel(sqlManager);
-			mainPanel.add(resultPanel, BorderLayout.EAST);
+			mainPanel.add(resultPanel, BorderLayout.CENTER);
 			attributePanel.addObserver(resultPanel);
 			
 			title = new JLabel("Yelp Database Application");
 			mainPanel.add(title, BorderLayout.NORTH);
 			
+			
 			JPanel buttonPanel = new JPanel();
-			buttonPanel.setLayout(new GridLayout(1, 5));
+			buttonPanel.setLayout(new GridLayout(1, 6));
 			mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 			
 			location = new ConditionSelector("city, state", "YelpBusiness", "state", sqlManager);
@@ -73,6 +78,42 @@ public class HW3 {
 			openHour = new ConditionSelector("openHour", "Hours", "openHour", sqlManager);
 			closeHour = new ConditionSelector("closeHour", "Hours", "closeHour", sqlManager);
 			
+			JPanel temp = new JPanel();
+			temp.setLayout(new GridLayout(1,1));
+//			temp.add(new JLabel("Day Of Week"));
+			temp.add(dayOfWeek);
+			buttonPanel.add(temp);
+			//temp.setBorder(BorderFactory.createLineBorder(Color.black));
+			//TitledBorder title = new TitledBorder(LineBorder.createGrayLineBorder(), "Search Result");
+			TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "title");
+			title.setTitleJustification(TitledBorder.CENTER);
+			title.setTitlePosition(TitledBorder.ABOVE_TOP);
+			temp.setBorder(new TitledBorder(LineBorder.createGrayLineBorder(), "Day of Week"));
+			
+			temp = new JPanel();
+			temp.setLayout(new GridLayout(1,1));
+//			temp.add(new JLabel("Open Hour"));
+			temp.add(openHour);
+			buttonPanel.add(temp);
+			//temp.setBorder(BorderFactory.createLineBorder(Color.black));
+			temp.setBorder(new TitledBorder(LineBorder.createGrayLineBorder(), "Open Hour"));
+			
+			temp = new JPanel();
+			temp.setLayout(new GridLayout(1,1));
+//			temp.add(new JLabel("Close Hour"));
+			temp.add(closeHour);
+			buttonPanel.add(temp);
+			//temp.setBorder(BorderFactory.createLineBorder(Color.black));
+			temp.setBorder(new TitledBorder(LineBorder.createGrayLineBorder(), "Close Hour"));
+			
+			temp = new JPanel();
+			temp.setLayout(new GridLayout(1,1));
+//			temp.add(new JLabel("Location"));
+			temp.add(location);
+			buttonPanel.add(temp);
+			//temp.setBorder(BorderFactory.createLineBorder(Color.black));
+			temp.setBorder(new TitledBorder(LineBorder.createGrayLineBorder(), "Location"));
+
 			mainCategoryPanel.addObserver(location);
 			subCategorypanel.addObserver(location);
 			attributePanel.addObserver(location);
@@ -87,10 +128,6 @@ public class HW3 {
 			attributePanel.addObserver(closeHour);
 			
 			search = new JButton("Search");
-			buttonPanel.add(dayOfWeek);
-			buttonPanel.add(openHour);
-			buttonPanel.add(closeHour);
-			buttonPanel.add(location);
 			buttonPanel.add(search);
 			search.addActionListener(new ActionListener() {
 				@Override
@@ -105,8 +142,24 @@ public class HW3 {
 				}
 				
 			});
-			mainFrame.setSize(1000,700);
-			mainFrame.setVisible(true);
+			
+			clear = new JButton("Clear");
+			buttonPanel.add(clear);
+			clear.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					mainCategoryPanel.unCheckALL();
+					dayOfWeek.clear();
+					openHour.clear();
+					closeHour.clear();
+					location.clear();
+				}
+				
+			});
+			
+			mainFrame.setSize(1500,700);
+			mainFrame.setLocationRelativeTo(null); 
+			mainFrame.setVisible(true); 
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

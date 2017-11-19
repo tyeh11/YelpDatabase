@@ -45,6 +45,10 @@ public class ConditionSelector extends JComboBox implements Observer{
 		
 	}
 	
+	public void clear() {
+		this.removeAllItems();
+	}
+	
 	public String getSelectedValue() {
 		return (String)this.getSelectedItem();
 	}
